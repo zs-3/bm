@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Bookmark Manager</title>
+  <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #121212;
+      color: #e0e0e0;
+      padding: 10px;
+    }
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      background: #1e1e1e;
+      padding: 15px;
+      border-radius: 6px;
+      box-shadow: 0 0 5px #000;
+    }
+    h2 {
+      text-align: center;
+      color: #90caf9;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 6px;
+      border: 1px solid #444;
+      background: #2c2c2c;
+      color: #fff;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 6px 12px;
+      margin-top: 10px;
+      background: #333;
+      color: #e0e0e0;
+      border: 1px solid #444;
+      cursor: pointer;
+    }
+    .bookmark-btn {
+      margin-left: 10px;
+      padding: 2px 6px;
+      font-size: 12px;
+    }
+    #bookmarks {
+      margin-top: 15px;
+    }
+    .bookmark {
+      margin: 5px 0;
+      padding: 6px;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 4px;
+    }
+    .bookmark a {
+      color: #80d0ff;
+      text-decoration: none;
+      display: inline-block;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .system-apps {
+      margin-top: 20px;
+    }
+    .system-apps h3 {
+      color: #ffcc00;
+      margin-bottom: 10px;
+    }
+    .system-apps button {
+      display: block;
+      width: 100%;
+      margin-top: 5px;
+      background: #2d2d2d;
+      border: 1px solid #555;
+      color: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📚 Bookmark Manager</h2>
+
+    <label for="title">Title:</label>
+    <input type="text" id="title" placeholder="Bookmark title">
+
+    <label for="url">URL:</label>
+    <input type="text" id="url" placeholder="https://example.com or app://">
+
+    <button onclick="addBookmark()">Add Bookmark</button>
+    <button onclick="clearBookmarks()">Clear All</button>
+
+    <div id="bookmarks"></div>
+
+    <div class="system-apps">
+      <h3>📱 Open iOS 9.3.5 System Apps</h3>
+      <button onclick="launchApp('tel:123')">📞 Phone</button>
+      <button onclick="launchApp('sms:123')">💬 Messages</button>
+      <button onclick="launchApp('mailto:test@example.com')">✉️ Mail</button>
+      <button onclick="launchApp('maps://')">🗺️ Maps</button>
+      <button onclick="launchApp('music://')">🎵 Music</button>
+      <button onclick="launchApp('photos-redirect://')">📷 Photos</button>
+      <button onclick="launchApp('itms://itunes.apple.com')">🎧 iTunes Store</button>
+      <button onclick="launchApp('http://')">🌐 Safari</button>
+    </div>
+  </div>
+
+  <script>
+    function loadBookmarks() {
+      var data = localStorage.getItem('bookmarks');
+      if (!data) return;
+      var list = JSON.parse(data);
+      var container = document.getElementById('bookmarks');
+      container.innerHTML = '';
+      for (var i = 0; i < list.length; i++) {
+        (function(index){
+          var div = document.createElement('div');
+          div.className = 'bookmark';
+          var url = list[i].url;
+          var isAppLink = url.indexOf('://') > -1 && !url.startsWith('http');
+          if (isAppLink) {
+            div.innerHTML = '<a href="#" onclick="launchApp(\'' + url + '\')">' + list[i].title + '</a>';
+          } else {
+            div.innerHTML = '<a href="' + url + '" target="_blank">' + list[i].title + '</a>';
+          }
+          div.innerHTML += '<button class="bookmark-btn" onclick="editBookmark(' + index + ')">Edit</button>' +
+                           '<button class="bookmark-btn" onclick="deleteBookmark(' + index + ')">Delete</button>';
+          container.appendChild(div);
+        })(i);
+      }
+    }
+
+    function addBookmark() {
+      var title = document.getElementById('title').value.trim();
+      var url = document.getElementById('url').value.trim();
+      if (!title || !url) return alert('Enter both title and URL.');
+
+      if (!url.match(/^\w+:\/\//)) url = 'https://' + url;
+      var list = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+      list.push({ title: title, url: url });
+      localStorage.setItem('bookmarks', JSON.stringify(list));
+      document.getElementById('title').value = '';
+      document.getElementById('url').value = '';
+      loadBookmarks();
+    }
+
+    function editBookmark(index) {
+      var list = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+      var newTitle = prompt('Edit title:', list[index].title);
+      var newUrl = prompt('Edit URL:', list[index].url);
+      if (newTitle && newUrl) {
+        list[index] = { title: newTitle.trim(), url: newUrl.trim() };
+        localStorage.setItem('bookmarks', JSON.stringify(list));
+        loadBookmarks();
+      }
+    }
+
+    function deleteBookmark(index) {
+      var list = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+      list.splice(index, 1);
+      localStorage.setItem('bookmarks', JSON.stringify(list));
+      loadBookmarks();
+    }
+
+    function clearBookmarks() {
+      if (confirm('Delete all bookmarks?')) {
+        localStorage.removeItem('bookmarks');
+        loadBookmarks();
+      }
+    }
+
+    function launchApp(url) {
+      window.location = url;
+    }
+
+    loadBookmarks();
+  </script>
+</body>
+</html>
