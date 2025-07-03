@@ -85,7 +85,7 @@
     }
   </style>
 </head>
-<body>
+<body onload="loadBookmarks()">
   <div class="container">
     <h2>📚 Bookmark Manager</h2>
 
@@ -116,25 +116,30 @@
   <script>
     function loadBookmarks() {
       var data = localStorage.getItem('bookmarks');
-      if (!data) return;
-      var list = JSON.parse(data);
       var container = document.getElementById('bookmarks');
       container.innerHTML = '';
-      for (var i = 0; i < list.length; i++) {
-        (function(index){
-          var div = document.createElement('div');
-          div.className = 'bookmark';
-          var url = list[i].url;
-          var isAppLink = url.indexOf('://') > -1 && !url.startsWith('http');
-          if (isAppLink) {
-            div.innerHTML = '<a href="#" onclick="launchApp(\'' + url + '\')">' + list[i].title + '</a>';
-          } else {
-            div.innerHTML = '<a href="' + url + '" target="_blank">' + list[i].title + '</a>';
-          }
-          div.innerHTML += '<button class="bookmark-btn" onclick="editBookmark(' + index + ')">Edit</button>' +
-                           '<button class="bookmark-btn" onclick="deleteBookmark(' + index + ')">Delete</button>';
-          container.appendChild(div);
-        })(i);
+      if (!data) return;
+      try {
+        var list = JSON.parse(data);
+        for (var i = 0; i < list.length; i++) {
+          (function(index){
+            var div = document.createElement('div');
+            div.className = 'bookmark';
+            var url = list[i].url;
+            var isAppLink = url.indexOf('://') > -1 && !url.startsWith('http');
+            if (isAppLink) {
+              div.innerHTML = '<a href="#" onclick="launchApp(\'' + url + '\')">' + list[i].title + '</a>';
+            } else {
+              div.innerHTML = '<a href="' + url + '" target="_blank">' + list[i].title + '</a>';
+            }
+            div.innerHTML += '<button class="bookmark-btn" onclick="editBookmark(' + index + ')">Edit</button>' +
+                             '<button class="bookmark-btn" onclick="deleteBookmark(' + index + ')">Delete</button>';
+            container.appendChild(div);
+          })(i);
+        }
+      } catch (e) {
+        console.error("Failed to parse bookmarks", e);
+        localStorage.removeItem('bookmarks');
       }
     }
 
@@ -180,8 +185,6 @@
     function launchApp(url) {
       window.location = url;
     }
-
-    loadBookmarks();
   </script>
 </body>
 </html>
