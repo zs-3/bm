@@ -130,7 +130,7 @@
             if (isAppLink) {
               div.innerHTML = '<a href="#" onclick="launchApp(\'' + url + '\')">' + list[i].title + '</a>';
             } else {
-              div.innerHTML = '<a href="' + url + '" target="_blank">' + list[i].title + '</a>';
+              div.innerHTML = '<a href="' + url + '">' + list[i].title + '</a>';
             }
             div.innerHTML += '<button class="bookmark-btn" onclick="editBookmark(' + index + ')">Edit</button>' +
                              '<button class="bookmark-btn" onclick="deleteBookmark(' + index + ')">Delete</button>';
